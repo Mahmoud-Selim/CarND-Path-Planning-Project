@@ -51,23 +51,23 @@ The model consists of three modules:
 #### 1. Prediction Model
 The car uses the data from the sensor fusion module to make predictions about other vehicles on the road. It makes these predictions every time it generates new points.
 
-The prediction function is the '''make_prediction()''' function.
+The prediction function is the `make_prediction()` function.
  
 #### 2. Path Planner 
-Regargind the planner of the car, it starts with the fuction '''choose_next_state()''' this function makes a call the the '''make_prediction()''' functions and then computes the cost by calling the '''compute_cost()''' function it then selects the state associated with the lowest cost
+Regargind the planner of the car, it starts with the fuction `choose_next_state()` this function makes a call the the `make_prediction()` functions and then computes the cost by calling the `compute_cost()` function it then selects the state associated with the lowest cost
 
 ### 3. Cost Functions
-The planner has two functions. the first one computes the inefficeiency of the car with is the speed. the lower the speed, the higher the inefficiency of the car. The second one is the '''distance_cost()''' function. This one is responsible for making costs for the states when the state is unsafe. the compute_cost() function computes both costs but, penalizes the '''dist_cost''' with higher weight and that's because safety is considered more important than the speed of the car. 
+The planner has two functions. the first one computes the inefficeiency of the car with is the speed. the lower the speed, the higher the inefficiency of the car. The second one is the `distance_cost()` function. This one is responsible for making costs for the states when the state is unsafe. the compute_cost() function computes both costs but, penalizes the `dist_cost` with higher weight and that's because safety is considered more important than the speed of the car. 
 
 ### 4. Spline And The Path Generator
 The pathplanner only selects the state of the car, that is the lane in which the car drives. Then, it sends this information to the spline module. We use it to generate points for the car and sends these points to the simulator.
 
 ### Finally, some screen shots of the car surpassing 15 miles and changing lanes.
 
-![alt text](https://github.com/Mahmoud-Selim/CarND-Behavioral-Cloning-P3/blob/master/Screenshots/center_2018_11_22_00_46_25_694.jpg)
+![alt text](https://github.com/Mahmoud-Selim/CarND-Path-Planning-Project/blob/master/Screenshots/Screenshot%20from%202018-12-27%2005-21-24.png)
 
-![alt text](https://github.com/Mahmoud-Selim/CarND-Behavioral-Cloning-P3/blob/master/Screenshots/center_2018_11_22_00_54_56_040.jpg)
-![alt text](https://github.com/Mahmoud-Selim/CarND-Behavioral-Cloning-P3/blob/master/Screenshots/center_2018_11_22_00_55_16_196.jpg)
+![alt text](https://github.com/Mahmoud-Selim/CarND-Path-Planning-Project/blob/master/Screenshots/Screenshot%20from%202018-12-27%2005-23-09.png)
 
+![alt text](https://github.com/Mahmoud-Selim/CarND-Path-Planning-Project/blob/master/Screenshots/Screenshot%20from%202018-12-27%2005-23-59.png)
 
-![alt text](https://github.com/Mahmoud-Selim/CarND-Behavioral-Cloning-P3/blob/master/Screenshots/trainVSvalid_error.jpg)
+![alt text](https://github.com/Mahmoud-Selim/CarND-Path-Planning-Project/blob/master/Screenshots/Screenshot%20from%202018-12-27%2005-27-11.png)
