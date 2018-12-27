@@ -27,7 +27,7 @@ My project includes the following files:
 
 ### Valid Trajectories.
 #### 2. The car is able to drive at least 4.32 miles without incident.	
-The car was tested and it drove over 7 miles on my local machine. It was also tested many times to ensure the quality of the path planner.
+The car was tested and it drove over 15 miles on my local machine. It was also tested many times to ensure the quality of the path planner.
 
 #### 3. The car drives according to the speed limit.
 Yes, The car didn't pass the 50 MPH. It also stayed within the jerk and acceleration limits specified by the project.
