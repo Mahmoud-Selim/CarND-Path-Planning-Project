@@ -436,7 +436,7 @@ int main() {
         	{
         		lane = choose_next_state(get_lane(car_d), prev_size, car_s, sensor_fusion);
         	}
-        	cout<<car_d<<endl;
+
 
         	// checks to see if there is a car at 30 miles near our car. If so our car slows down
         	for(auto &object : sensor_fusion)
