@@ -276,7 +276,7 @@ double distance_cost(int s, vector<vector <double>> sensor_fusion, vector <doubl
 	}
 	for(auto &distance: lane_distances)
 	{
-		if(abs(distance  - s ) < 20)
+		if(abs(distance  - s ) < 25)
 		{
 			double cost = 1;
 			return cost;
@@ -370,8 +370,15 @@ int main() {
   double ref_vel = 0; //mph
   int lane = 1;
   int starting_counter = 0;
-  h.onMessage([&lane,&starting_counter, &ref_vel, &map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
-                     uWS::OpCode opCode) {
+  h.onMessage([&lane,&starting_counter,
+			   &ref_vel,
+			   &map_waypoints_x,
+			   &map_waypoints_y,
+			   &map_waypoints_s,
+			   &map_waypoints_dx,
+			   &map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws,
+			   char *data, size_t length,
+               uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -422,18 +429,20 @@ int main() {
         	{
         		car_s = end_path_s;
         	}
-        	// The car is not allowed to change lanes under 30 MPH speed
-        	if(car_speed > 30)
+        	// The car is not allowed to change lanes under 35 MPH speed. It should perform changes quickly.
+        	// The car should also be in the middle of the lane to be able to make changes. It cannot
+        	// choose another lane while it's already making lane changes
+        	if(car_speed > 35 && car_d < 2.5	 + (lane * 4) && car_d > 1.5 + (lane * 4))
         	{
         		lane = choose_next_state(get_lane(car_d), prev_size, car_s, sensor_fusion);
         	}
-
+        	cout<<car_d<<endl;
 
         	// checks to see if there is a car at 30 miles near our car. If so our car slows down
         	for(auto &object : sensor_fusion)
         	{
         		double d = object[6];
-        		if(d < 2 + 4*lane + 2.05 && d > 2 + 4 * lane - 1.95)
+        		if(d < 2 + 4*lane + 2.00 && d > 2 + 4 * lane - 2.00)
         		{
         			double vx = object[3];
         			double vy = object[4];
@@ -450,7 +459,7 @@ int main() {
         	}
         	if(too_close)
         	{
-        		ref_vel -= 0.224;
+        		ref_vel -= 0.3	;
         	}
         	else if(ref_vel < 48.5)
         	{
