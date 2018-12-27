@@ -432,7 +432,7 @@ int main() {
         	// The car is not allowed to change lanes under 35 MPH speed. It should perform changes quickly.
         	// The car should also be in the middle of the lane to be able to make changes. It cannot
         	// choose another lane while it's already making lane changes
-        	if(car_speed > 35 && car_d < 2.5	 + (lane * 4) && car_d > 1.5 + (lane * 4))
+        	if(car_speed > 35 && car_d < 2.5 + (lane * 4) && car_d > 1.5 + (lane * 4))
         	{
         		lane = choose_next_state(get_lane(car_d), prev_size, car_s, sensor_fusion);
         	}
