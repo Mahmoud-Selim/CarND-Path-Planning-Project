@@ -17,7 +17,7 @@ using namespace std;
 #define LANE_WIDTH 4
 #define INEFFICIENCY_COST 10
 #define DISTANCE_COST 100
-#define SAFETY_COST 100
+
 // for convenience
 using json = nlohmann::json;
 
@@ -176,6 +176,9 @@ struct lane_speed_sort
     bool operator()(T const &a, T const &b) const { return a[0] < b[0]; }
 };
 
+
+// This function gets the speed of the lane (to be used in the inefficiency function). The speed of the lane
+// is determined by the speed of the first car whose s is greater than the s of our car.
 double lane_speed(int s, vector<vector <double>> sensor_fusion, int lane)
 {
 	int max_distance_limit = 50;
@@ -202,17 +205,20 @@ double lane_speed(int s, vector<vector <double>> sensor_fusion, int lane)
 	return 50;
 }
 
+// This function gets the efficiency cost of the lane. the higher the lane speed, the lower the cost.
 double inefficiency_cost(int s, vector<vector <double>> sensor_fusion, int lane)
 {
 	double speed = lane_speed(s, sensor_fusion, lane);
-	return 1 - exp(-1 * abs((double)speed - 50));
+	return (abs(speed - 50.0) / 50.0);
 }
 
+// returns the lane number corresponding to a certain d coordinate.
 int get_lane(double d)
 {
 	return (int)(d / 4);
 }
 
+// Returns the states of the car in order to search in them.
 vector<int> possible_states(int lane) {
     /*
     Provides the possible next states given the current state for the FSM
@@ -238,6 +244,7 @@ vector<int> possible_states(int lane) {
     return states;
 }
 
+// This function makes predictions about the other vehicles s values at the end of our car's trajectory.
 vector<double> make_predictions(int prev_size, double car_s, vector<vector <double>> sensor_fusion)
 {
 	vector<double>predictions;
@@ -254,6 +261,7 @@ vector<double> make_predictions(int prev_size, double car_s, vector<vector <doub
 	return predictions;
 }
 
+//This function gets the cost associated with how far, or close, other vehicles are with respect to our car.
 double distance_cost(int s, vector<vector <double>> sensor_fusion, vector <double> predictions,int lane)
 {
 	int max_distance_limit = 100;
@@ -276,6 +284,9 @@ double distance_cost(int s, vector<vector <double>> sensor_fusion, vector <doubl
 	}
 	return 0;
 }
+
+// This function calculates to total cost of the car being in some lane and returns it.
+// Distance costs which represent safety costs are heavily weighted more than the efficiency(speed) cost
 double calculate_cost(double car_s, int state, vector<double> predictions, vector<vector <double>> sensor_fusion)
 {
 	double cost = 0;
@@ -295,7 +306,7 @@ double calculate_cost(double car_s, int state, vector<double> predictions, vecto
 	return cost;
 }
 
-
+// This function chooses the next state(lane) for the car. It choses the lane with the lowest cost.
 double choose_next_state(int lane, int prev_size, double car_s, vector<vector <double>> sensor_fusion)
 {
 
@@ -307,7 +318,10 @@ double choose_next_state(int lane, int prev_size, double car_s, vector<vector <d
     for(auto &state : states)
     {
     	double state_cost = calculate_cost(car_s, state , predictions, sensor_fusion);
-        if(cost - state_cost > 2 && state_cost < 10)
+
+    	// makes sure the lane is safe to drive in and there is an actual speed difference
+    	//between the lanes and not just noise
+        if(cost - state_cost > 4 && state_cost < 10)
         {
         	cost = state_cost;
             selected_state = state;
@@ -354,7 +368,9 @@ int main() {
   	map_waypoints_dy.push_back(d_y);
   }
   double ref_vel = 0; //mph
-  h.onMessage([&ref_vel, &map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
+  int lane = 1;
+  int starting_counter = 0;
+  h.onMessage([&lane,&starting_counter, &ref_vel, &map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
@@ -399,16 +415,21 @@ int main() {
 
 
           	// define a path made up of (x,y) points that the car will visit sequentially every .02 seconds
-          	double dist_inc = 0.3;
-        	int lane;// = 1;
+          	double dist_inc = 0.3;;
         	int prev_size = previous_path_x.size();
         	bool too_close = false;
         	if(prev_size > 0)
         	{
         		car_s = end_path_s;
         	}
-        	lane = choose_next_state(get_lane(car_d), prev_size, car_s, sensor_fusion);
+        	// The car is not allowed to change lanes under 30 MPH speed
+        	if(car_speed > 30)
+        	{
+        		lane = choose_next_state(get_lane(car_d), prev_size, car_s, sensor_fusion);
+        	}
 
+
+        	// checks to see if there is a car at 30 miles near our car. If so our car slows down
         	for(auto &object : sensor_fusion)
         	{
         		double d = object[6];
@@ -429,11 +450,11 @@ int main() {
         	}
         	if(too_close)
         	{
-        		ref_vel -= 0.5;
+        		ref_vel -= 0.224;
         	}
         	else if(ref_vel < 48.5)
         	{
-        		ref_vel += 1;
+        		ref_vel += 0.224;
         		too_close = false;
         	}
 
